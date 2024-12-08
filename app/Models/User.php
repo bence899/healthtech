@@ -52,4 +52,23 @@ class User extends Authenticatable
             'date_of_birth' => 'date',
         ];
     }
+    /**
+     * Get the appointments for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'patient_id');
+    }
+
+    /**
+     * Get the doctor for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function doctor()
+    {
+        return $this->hasOne(Doctor::class);
+    }
 }
