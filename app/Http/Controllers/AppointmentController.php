@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Doctor;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
+use App\Notifications\AppointmentStatusChanged;
 
 class AppointmentController extends Controller
 {
@@ -61,7 +62,11 @@ class AppointmentController extends Controller
             return back()->with('error', 'This appointment cannot be cancelled.');
         }
 
+        $previousStatus = $appointment->status;
+
         $appointment->update(['status' => 'cancelled']);
+
+        $appointment->patient->notify(new AppointmentStatusChanged($appointment, $previousStatus));
 
         return back()->with('success', 'Appointment cancelled successfully.');
     }
