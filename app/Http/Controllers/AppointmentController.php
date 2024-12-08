@@ -48,4 +48,21 @@ class AppointmentController extends Controller
         return redirect()->route('appointments.index')
         ->with('success', 'Appointment scheduled successfully!');
     }
+
+    public function cancel(Appointment $appointment)
+    {
+        // Check if the user owns this appointment
+        if ($appointment->patient_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Only allow cancellation of pending or confirmed appointments
+        if (!in_array($appointment->status, ['pending', 'confirmed'])) {
+            return back()->with('error', 'This appointment cannot be cancelled.');
+        }
+
+        $appointment->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Appointment cancelled successfully.');
+    }
 }

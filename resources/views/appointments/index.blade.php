@@ -35,6 +35,9 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Reason
                                 </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -57,11 +60,39 @@
                                 <td class="px-6 py-4">
                                     {{ $appointment->reason_for_visit }}
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    @if(in_array($appointment->status, ['pending', 'confirmed']))
+                                        <form method="POST" action="{{ route('appointments.cancel', $appointment) }}" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" 
+                                                    onclick="return confirm('Are you sure you want to cancel this appointment?')"
+                                                    class="text-red-600 hover:text-red-900">
+                                                Cancel
+                                            </button>
+                                        </form>
+                                    @endif
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+                @endif
+                @if (session('success'))
+                    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4">
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                            <span class="block sm:inline">{{ session('success') }}</span>
+                        </div>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4">
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                            <span class="block sm:inline">{{ session('error') }}</span>
+                        </div>
+                    </div>
                 @endif
             </div>
         </div>
