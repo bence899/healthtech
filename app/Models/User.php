@@ -71,4 +71,14 @@ class User extends Authenticatable
     {
         return $this->hasOne(Doctor::class);
     }
+
+    /**
+     * Get the documents for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function documents()
+    {
+        return $this->hasMany(MedicalDocument::class);
+    }
 }
