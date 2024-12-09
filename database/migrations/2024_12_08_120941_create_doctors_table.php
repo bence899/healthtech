@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('specialization');
-            $table->text('qualifications');
-            $table->text('experience');
+            $table->string('qualifications');
+            $table->text('experience')->nullable();
             $table->boolean('is_available')->default(true);
             $table->json('working_hours')->nullable();
+            $table->decimal('consultation_fee', 10, 2)->nullable();
+            $table->text('bio')->nullable();
             $table->timestamps();
         });
     }
