@@ -37,6 +37,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('doctors', AdminDoctorController::class);
     Route::resource('appointments', AdminAppointmentController::class);
+    Route::patch('/appointments/{appointment}/status', [AdminAppointmentController::class, 'updateStatus'])
+        ->name('appointments.update-status');
 });
 
 require __DIR__.'/auth.php';
