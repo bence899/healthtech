@@ -32,70 +32,50 @@
         </nav>
 
         <!-- Hero Section -->
-        <div class="pt-24 bg-gradient-to-br from-blue-50 to-white">
-            <div class="container mx-auto px-6 py-16">
-                <div class="md:flex items-center justify-between">
-                    <div class="md:w-1/2 md:pr-12">
-                        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-                            Professional Healthcare at Your Fingertips
-                        </h1>
-                        <p class="text-xl text-gray-600 mb-8">
-                            Connect with qualified doctors, manage appointments, and access your medical records securely - all from the comfort of your home.
-                        </p>
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <a href="{{ route('register') }}" class="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition duration-300 text-center">
-                                Get Started
-                            </a>
-                            <a href="#services" class="bg-white text-blue-600 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-50 transition duration-300 border border-blue-600 text-center">
-                                Learn More
-                            </a>
+        <div class="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50">
+            <div class="absolute inset-0">
+                <div class="absolute inset-0 bg-[url('/images/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+            </div>
+            
+            <div class="relative pt-24 pb-16 sm:pt-32 sm:pb-24">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
+                        <div class="lg:col-span-6 max-w-2xl">
+                            <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                                Healthcare Made <span class="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Simple</span>
+                            </h1>
+                            <p class="mt-6 text-lg leading-8 text-gray-600">
+                                Connect with top healthcare professionals, schedule appointments, and manage your health journey - all in one secure platform.
+                            </p>
+                            <div class="mt-10 flex items-center gap-x-6">
+                                <a href="{{ route('register') }}" 
+                                   class="rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-8 py-4 text-lg font-semibold text-white shadow-sm hover:from-blue-500 hover:to-cyan-400 transition-all duration-300">
+                                    Get Started
+                                </a>
+                                <a href="#features" 
+                                   class="rounded-full px-8 py-4 text-lg font-semibold text-blue-600 border-2 border-blue-600 hover:bg-blue-50 transition-all duration-300">
+                                    Learn More
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="md:w-1/2 mt-12 md:mt-0">
-                        <img src="{{ asset('images/doctor-consultation.svg') }}" alt="Online Doctor Consultation" class="w-full">
+                        <div class="lg:col-span-6 mt-16 sm:mt-24 lg:mt-0">
+                            <x-application-logo class="w-full h-auto text-blue-600 animate-float" />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Features Section -->
-        <div id="services" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Our Services</h2>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <!-- Online Consultation -->
-                    <div class="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300">
-                        <div class="text-blue-600 mb-4">
-                            <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Online Consultation</h3>
-                        <p class="text-gray-600">Connect with healthcare professionals from the comfort of your home.</p>
-                    </div>
-
-                    <!-- Appointment Booking -->
-                    <div class="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300">
-                        <div class="text-blue-600 mb-4">
-                            <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Easy Scheduling</h3>
-                        <p class="text-gray-600">Book and manage your appointments with just a few clicks.</p>
-                    </div>
-
-                    <!-- Medical Records -->
-                    <div class="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300">
-                        <div class="text-blue-600 mb-4">
-                            <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Digital Records</h3>
-                        <p class="text-gray-600">Access your medical history and documents securely anytime.</p>
-                    </div>
+        <div id="features" class="py-24 bg-white sm:py-32">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl lg:text-center">
+                    <h2 class="text-base font-semibold leading-7 text-blue-600">Why Choose Us</h2>
+                    <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                        Everything you need for better healthcare
+                    </p>
                 </div>
+                <!-- Add feature cards here -->
             </div>
         </div>
 

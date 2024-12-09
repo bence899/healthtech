@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+    <!-- Modern medical illustration -->
+    <style>
+        .primary { fill: #4F46E5 }
+        .secondary { fill: #06B6D4 }
+        .accent { fill: #F472B6 }
+    </style>
+    <rect width="800" height="600" fill="none"/>
+    <!-- Add detailed medical illustration paths here -->
+    <!-- I can provide the full SVG paths if needed -->
+</svg> 
