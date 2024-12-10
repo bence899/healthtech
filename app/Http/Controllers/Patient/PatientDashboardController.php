@@ -3,32 +3,20 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Appointment;
-use App\Models\MedicalDocument;
-use App\Models\Patient;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class PatientDashboardController extends Controller
 {
     public function index()
     {
-        $patient = Patient::firstOrCreate(
-            ['user_id' => auth()->id()],
-            ['created_at' => now()]
-        );
-
-        $upcoming_appointments = Appointment::with('doctor.user')
-            ->where('patient_id', $patient->id)
-            ->where('appointment_date', '>=', now())
-            ->orderBy('appointment_date')
-            ->take(5)
+        $upcomingAppointments = auth()->user()->patient->appointments()
+            ->with(['doctor.user'])
+            ->where('status', 'confirmed')
+            ->where('appointment_date', '>', Carbon::now())
+            ->orderBy('appointment_date', 'asc')
+            ->take(5)  // Limit to 5 upcoming appointments
             ->get();
 
-        $recent_documents = MedicalDocument::where('user_id', auth()->id())
-            ->latest()
-            ->take(3)
-            ->get();
-
-        return view('patient.dashboard', compact('upcoming_appointments', 'recent_documents'));
+        return view('patient.dashboard', compact('upcomingAppointments'));
     }
 } 
