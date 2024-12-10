@@ -5,14 +5,20 @@ namespace App\Http\Controllers\Patient;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\MedicalDocument;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 
 class PatientDashboardController extends Controller
 {
     public function index()
     {
+        $patient = Patient::firstOrCreate(
+            ['user_id' => auth()->id()],
+            ['created_at' => now()]
+        );
+
         $upcoming_appointments = Appointment::with('doctor.user')
-            ->where('patient_id', auth()->id())
+            ->where('patient_id', $patient->id)
             ->where('appointment_date', '>=', now())
             ->orderBy('appointment_date')
             ->take(5)

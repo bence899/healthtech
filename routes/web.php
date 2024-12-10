@@ -37,6 +37,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/schedule', [DoctorScheduleController::class, 'store'])->name('schedule.store');
         Route::put('/schedule/{schedule}', [DoctorScheduleController::class, 'update'])->name('schedule.update');
         Route::delete('/schedule/{schedule}', [DoctorScheduleController::class, 'destroy'])->name('schedule.destroy');
+        Route::post('/appointments/{appointment}/respond', [DoctorDashboardController::class, 'respondToAppointment'])
+            ->name('appointments.respond');
+        Route::get('/appointments', [DoctorDashboardController::class, 'appointments'])
+            ->name('appointments.index');
     });
 
     // Patient Routes
@@ -62,5 +66,4 @@ Route::middleware('auth')->group(function () {
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])
         ->name('documents.download');
 });
-
 require __DIR__.'/auth.php';

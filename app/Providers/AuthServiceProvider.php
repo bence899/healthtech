@@ -35,6 +35,10 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('view-document', function (User $user, MedicalDocument $document) {
             return $user->id === $document->user_id || $user->role === 'admin';
         });
+
+        Gate::define('access-doctor-dashboard', function ($user) {
+            return $user->role === 'doctor';
+        });
     }
 
     /**

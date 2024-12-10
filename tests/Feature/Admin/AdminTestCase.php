@@ -3,25 +3,41 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class AdminTestCase extends TestCase
+abstract class AdminTestCase extends TestCase
 {
     use RefreshDatabase;
 
-    protected function createAdmin(): User
+    protected $admin;
+
+    protected function createAdmin()
     {
         return User::factory()->create([
             'role' => 'admin',
-            'email' => 'admin@healthtech.com'
+            'email_verified_at' => now(),
         ]);
     }
 
-    protected function createPatient(): User
+    protected function createPatient()
     {
         return User::factory()->create([
-            'role' => 'patient'
+            'role' => 'patient',
+            'email_verified_at' => now(),
+        ]);
+    }
+
+    protected function createDoctor()
+    {
+        $user = User::factory()->create([
+            'role' => 'doctor',
+            'email_verified_at' => now(),
+        ]);
+
+        return $user->doctor()->create([
+            'specialization' => 'General Practice',
+            'qualifications' => 'MD',
         ]);
     }
 } 

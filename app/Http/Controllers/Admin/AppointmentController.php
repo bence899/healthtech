@@ -10,56 +10,41 @@ use App\Notifications\AppointmentStatusChanged;
 
 class AppointmentController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = Appointment::with(['patient', 'doctor.user']);
-
-        // Search functionality
-        if ($request->search) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('patient', function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
-                })
-                ->orWhereHas('doctor.user', function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                });
-            });
-        }
-
-        // Status filter
-        if ($request->status && $request->status !== 'all') {
-            $query->where('status', $request->status);
-        }
-
-        // Date filter
-        if ($request->date) {
-            $query->whereDate('appointment_date', $request->date);
-        }
-
-        // Doctor filter
-        if ($request->doctor_id) {
-            $query->where('doctor_id', $request->doctor_id);
-        }
-
+        $appointments = Appointment::with(['patient', 'doctor.user'])->paginate(10);
         $doctors = Doctor::with('user')->get();
-        $appointments = $query->latest()->paginate(10)->withQueryString();
-
+        
         return view('admin.appointments.index', compact('appointments', 'doctors'));
     }
 
     public function updateStatus(Request $request, Appointment $appointment)
     {
         $validated = $request->validate([
-            'status' => 'required|in:confirmed,cancelled,completed,pending'
+            'status' => ['required', 'in:confirmed,cancelled,completed,pending']
         ]);
 
-        $previousStatus = $appointment->status;
         $appointment->update($validated);
+        
+        $appointment->patient->user->notify(new AppointmentStatusChanged($appointment));
 
-        $appointment->patient->notify(new AppointmentStatusChanged($appointment, $previousStatus));
+        return redirect()->back()->with('success', 'Appointment status updated successfully.');
+    }
 
-        return back()->with('success', 'Appointment status updated successfully.');
+    public function cancel(Appointment $appointment)
+    {
+        if ($appointment->patient_id !== auth()->user()->patient->id) {
+            abort(403);
+        }
+
+        if (in_array($appointment->status, ['completed', 'confirmed'])) {
+            return redirect()->back()
+                ->with('error', 'Cannot cancel a confirmed or completed appointment');
+        }
+
+        $appointment->update(['status' => 'cancelled']);
+        
+        return redirect()->back()
+            ->with('success', 'Appointment cancelled successfully');
     }
 } 

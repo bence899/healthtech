@@ -6,6 +6,7 @@ use App\Models\Doctor;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
 use App\Notifications\AppointmentStatusChanged;
+use App\Models\Patient;
 
 class AppointmentController extends Controller
 {
@@ -14,7 +15,17 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        $appointments = auth()->user()->appointments;
+        $patient = auth()->user()->patient;
+        
+        if (!$patient) {
+            $patient = Patient::create(['user_id' => auth()->id()]);
+        }
+        
+        $appointments = $patient->appointments()
+            ->with(['doctor.user'])
+            ->orderBy('appointment_date', 'asc')
+            ->get();
+
         return view('appointments.index', compact('appointments'));
     }
 
@@ -38,72 +49,48 @@ class AppointmentController extends Controller
         $validated = $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
             'appointment_date' => 'required|date|after:today',
-            'reason_for_visit' => 'required|string|max:255',
+            'appointment_time' => 'required|date_format:H:i',
+            'reason_for_visit' => 'required|string|max:500'
         ]);
 
-        // Get doctor's schedule
-        $doctor = Doctor::findOrFail($validated['doctor_id']);
-        $schedule = json_decode($doctor->working_hours, true) ?? $doctor->schedule;
-        
-        // Get day of week from appointment date
-        $dayOfWeek = strtolower(date('l', strtotime($validated['appointment_date'])));
-        
-        // Get appointment time
-        $appointmentTime = date('H:i', strtotime($validated['appointment_date']));
-        
-        // Check if day exists in schedule
-        if (!isset($schedule[$dayOfWeek])) {
-            return back()
-                ->withInput()
-                ->withErrors(['appointment_date' => 'Doctor is not available on this day.']);
+        try {
+            $appointmentDateTime = \Carbon\Carbon::parse(
+                $validated['appointment_date'] . ' ' . $validated['appointment_time']
+            )->format('Y-m-d H:i:s');
+
+            $patient = auth()->user()->patient ?? Patient::create(['user_id' => auth()->id()]);
+
+            $appointment = Appointment::create([
+                'patient_id' => $patient->id,
+                'doctor_id' => $validated['doctor_id'],
+                'appointment_date' => $appointmentDateTime,
+                'reason_for_visit' => $validated['reason_for_visit'],
+                'status' => 'pending'
+            ]);
+
+            return redirect()->route('appointments.index')
+                ->with('success', 'Appointment booked successfully.');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                ->withErrors(['appointment_date' => 'Invalid date/time format']);
         }
-
-        // Check if time falls within any of the doctor's time slots
-        $isWithinSchedule = false;
-        foreach ($schedule[$dayOfWeek] as $timeSlot) {
-            [$start, $end] = explode('-', $timeSlot);
-            if ($appointmentTime >= $start && $appointmentTime <= $end) {
-                $isWithinSchedule = true;
-                break;
-            }
-        }
-
-        if (!$isWithinSchedule) {
-            return back()
-                ->withInput()
-                ->withErrors(['appointment_date' => 'Selected time is outside doctor\'s working hours.']);
-        }
-
-        $appointment = Appointment::create([
-            'patient_id' => auth()->id(),
-            'doctor_id' => $validated['doctor_id'],
-            'appointment_date' => $validated['appointment_date'],
-            'reason_for_visit' => $validated['reason_for_visit'],
-            'status' => 'pending'
-        ]);
-
-        return redirect()->route('appointments.index')
-            ->with('success', 'Appointment scheduled successfully!');
     }
 
     public function cancel(Appointment $appointment)
     {
-        // Check if the user owns this appointment
-        if ($appointment->patient_id !== auth()->id()) {
+        if ($appointment->patient_id !== auth()->user()->patient->id) {
             abort(403);
         }
 
-        // Only allow cancellation of pending or confirmed appointments
-        if (!in_array($appointment->status, ['pending', 'confirmed'])) {
-            return back()->with('error', 'This appointment cannot be cancelled.');
+        if ($appointment->status === 'completed') {
+            return redirect()->back()
+                ->with('error', 'Cannot cancel a completed appointment');
         }
 
-        $previousStatus = $appointment->status;
-
         $appointment->update(['status' => 'cancelled']);
+        auth()->user()->notify(new AppointmentStatusChanged($appointment));
 
-        $appointment->patient->notify(new AppointmentStatusChanged($appointment, $previousStatus));
-
-        return back()->with('success', 'Appointment cancelled successfully.');
+        return redirect()->back()
+            ->with('success', 'Appointment cancelled successfully');
     }
 }

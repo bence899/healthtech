@@ -72,12 +72,30 @@ class DoctorManagementTest extends AdminTestCase
         $admin = $this->createAdmin();
         
         $response = $this->actingAs($admin)->post(route('admin.doctors.store'), [
-            'name' => '', // Invalid: empty name
-            'email' => 'not-an-email', // Invalid: wrong email format
-            'password' => 'short', // Invalid: too short
-            // Missing required fields
+            'name' => '',  // Invalid empty name
+            'email' => 'invalid-email',  // Invalid email format
+            'password' => 'short',  // Invalid password
+            'password_confirmation' => 'different',  // Non-matching confirmation
+            'phone' => '',  // Empty required field
+            'address' => '',  // Empty required field
+            'date_of_birth' => '',  // Empty required field
+            'specialization' => '',  // Empty required field
+            'qualifications' => '',  // Empty required field
+            'experience' => '',  // Empty required field
+            'working_hours' => ''  // Invalid format for working hours
         ]);
 
-        $response->assertSessionHasErrors(['name', 'email', 'password']);
+        $response->assertSessionHasErrors([
+            'name',
+            'email',
+            'password',
+            'phone',
+            'address',
+            'date_of_birth',
+            'specialization',
+            'qualifications',
+            'experience',
+            'working_hours'
+        ]);
     }
 } 

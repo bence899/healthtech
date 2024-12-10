@@ -10,14 +10,25 @@ class MedicalDocument extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'title',
         'description',
         'file_path',
         'file_type',
         'file_size',
+        'user_id',
         'upload_month'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($document) {
+            if (!$document->upload_month) {
+                $document->upload_month = now()->format('Y-m');
+            }
+        });
+    }
 
     public function user()
     {

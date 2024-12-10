@@ -5,14 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\MedicalDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class DocumentController extends Controller
 {
+    use AuthorizesRequests;
+    
     public function index()
     {
-        $documents = MedicalDocument::where('user_id', auth()->id())
-            ->latest()
-            ->paginate(10);
+        $documents = auth()->user()->role === 'admin'
+            ? MedicalDocument::latest()->paginate(10)
+            : MedicalDocument::where('user_id', auth()->id())
+                ->latest()
+                ->paginate(10);
 
         return view('documents.index', compact('documents'));
     }
@@ -74,10 +79,16 @@ class DocumentController extends Controller
 
     public function download(MedicalDocument $document)
     {
-        if ($document->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
-            abort(403);
+        $this->authorize('view', $document);
+
+        if (!Storage::disk('s3')->exists($document->file_path)) {
+            abort(404);
         }
 
-        return Storage::disk('s3')->download($document->file_path);
+        return Storage::disk('s3')->download(
+            $document->file_path,
+            $document->title . '.' . $document->file_type,
+            ['Content-Type' => 'application/octet-stream']
+        );
     }
 } 

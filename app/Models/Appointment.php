@@ -37,11 +37,11 @@ class Appointment extends Model
     /**
      * Get the patient that owns the appointment.
      *
-     * @return BelongsTo<User>
+     * @return BelongsTo<Patient>
      */
     public function patient(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'patient_id');
+        return $this->belongsTo(Patient::class);
     }
 
     /**

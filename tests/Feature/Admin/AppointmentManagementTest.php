@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\User;
+use App\Models\Patient;
 use App\Notifications\AppointmentStatusChanged;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -18,7 +19,17 @@ class AppointmentManagementTest extends AdminTestCase
         parent::setUp();
         
         $this->admin = $this->createAdmin();
-        $patient = User::factory()->create(['role' => 'patient']);
+        
+        // Create patient user and patient record
+        $patientUser = User::factory()->create(['role' => 'patient']);
+        $patient = Patient::create([
+            'user_id' => $patientUser->id,
+            'date_of_birth' => now()->subYears(30),
+            'gender' => 'male',
+            'phone' => '1234567890',
+            'address' => '123 Test St'
+        ]);
+        
         $doctor = Doctor::factory()->create([
             'user_id' => User::factory()->create(['role' => 'doctor'])->id
         ]);
@@ -89,7 +100,7 @@ class AppointmentManagementTest extends AdminTestCase
         $this->assertEquals('confirmed', $this->appointment->status);
 
         Notification::assertSentTo(
-            $this->appointment->patient,
+            $this->appointment->patient->user,
             AppointmentStatusChanged::class
         );
     }

@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Http\Controllers\DocumentController;
+use Illuminate\Support\Facades\Storage;
 
 class StoreDocumentRequest extends FormRequest
 {
@@ -14,22 +14,35 @@ class StoreDocumentRequest extends FormRequest
 
     public function rules()
     {
+        $maxFileSize = config('documents.max_file_size', 10240); // 10MB default
+        $maxMonthlyUploads = config('documents.monthly_upload_limit', 50);
+        
         return [
-            'title' => 'required|string|max:255',
             'document' => [
                 'required',
                 'file',
-                'mimes:pdf,jpg,jpeg,png',
-                'max:' . DocumentController::MAX_FILE_SIZE,
-            ]
-        ];
-    }
+                'max:' . $maxFileSize,
+                function ($attribute, $value, $fail) use ($maxMonthlyUploads) {
+                    // Check monthly upload limit
+                    $monthlyCount = auth()->user()->medicalDocuments()
+                        ->whereMonth('created_at', now()->month)
+                        ->count();
+                    
+                    if ($monthlyCount >= $maxMonthlyUploads) {
+                        $fail('Monthly upload limit exceeded.');
+                    }
 
-    public function messages()
-    {
-        return [
-            'document.max' => 'The document field must not be greater than ' . DocumentController::MAX_FILE_SIZE . ' kilobytes.',
-            'document.mimes' => 'The document must be a PDF, JPG, or PNG file.'
+                    // Check total storage limit
+                    $totalStorage = auth()->user()->medicalDocuments()->sum('file_size');
+                    $maxStorage = config('documents.max_storage', 104857600); // 100MB default
+                    
+                    if (($totalStorage + $value->getSize()) > $maxStorage) {
+                        $fail('Total storage limit exceeded.');
+                    }
+                }
+            ],
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string'
         ];
     }
 } 

@@ -214,19 +214,8 @@
                 }
                 
                 if (isValid) {
-                    // Combine date and time for the backend
-                    const dateTime = new Date(appointmentDate + ' ' + appointmentTime);
-                    const formattedDateTime = dateTime.toISOString().slice(0, 19).replace('T', ' ');
-                    
-                    // Create hidden input for combined datetime
-                    let dateTimeInput = document.createElement('input');
-                    dateTimeInput.type = 'hidden';
-                    dateTimeInput.name = 'appointment_date';
-                    dateTimeInput.value = formattedDateTime;
-                    form.appendChild(dateTimeInput);
-                    
-                    // Submit the form
-                    form.submit();
+                    // Remove the preventDefault and let the form submit naturally
+                    e.target.submit();
                 }
             });
         });
