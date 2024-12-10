@@ -8,20 +8,16 @@ use App\Models\User;
 use App\Notifications\AppointmentStatusChanged;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
-use Tests\TestCase;
 
-class AppointmentManagementTest extends TestCase
+class AppointmentManagementTest extends AdminTestCase
 {
-    use RefreshDatabase;
-
-    private $admin;
     private $appointment;
 
     protected function setUp(): void
     {
         parent::setUp();
         
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->admin = $this->createAdmin();
         $patient = User::factory()->create(['role' => 'patient']);
         $doctor = Doctor::factory()->create([
             'user_id' => User::factory()->create(['role' => 'doctor'])->id

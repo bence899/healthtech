@@ -2,24 +2,45 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Doctor\DoctorDashboardController;
+use App\Http\Controllers\Patient\PatientDashboardController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DoctorController;
-use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Admin\DoctorController as AdminDoctorController;
 use App\Http\Controllers\DocumentController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
-// Regular user dashboard
-Route::get('/dashboard', function () {
-    if (auth()->user()->role === 'admin') {
-        return redirect()->route('admin.dashboard');
-    }
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Role-specific dashboards
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Admin Routes
+    Route::middleware('auth.admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::resource('doctors', AdminDoctorController::class);
+        Route::resource('appointments', AdminAppointmentController::class);
+        Route::patch('/appointments/{appointment}/status', [AdminAppointmentController::class, 'updateStatus'])
+            ->name('appointments.update-status');
+    });
+
+    // Doctor Routes
+    Route::middleware(['auth.doctor'])->prefix('doctor')->name('doctor.')->group(function () {
+        Route::get('/dashboard', [DoctorDashboardController::class, 'index'])->name('dashboard');
+        // ... other doctor routes
+    });
+
+    // Patient Routes
+    Route::middleware(['auth.patient'])->prefix('patient')->name('patient.')->group(function () {
+        Route::get('/dashboard', [PatientDashboardController::class, 'index'])->name('dashboard');
+        // ... other patient routes
+    });
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -36,15 +57,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('documents', DocumentController::class);
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])
         ->name('documents.download');
-});
-
-// Admin routes
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('doctors', AdminDoctorController::class);
-    Route::resource('appointments', AdminAppointmentController::class);
-    Route::patch('/appointments/{appointment}/status', [AdminAppointmentController::class, 'updateStatus'])
-        ->name('appointments.update-status');
 });
 
 require __DIR__.'/auth.php';

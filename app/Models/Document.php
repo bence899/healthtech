@@ -5,22 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MedicalDocument extends Model
+class Document extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'patient_id',
         'title',
-        'description',
         'file_path',
-        'file_type',
-        'file_size',
-        'upload_month'
+        // Add other relevant fields
     ];
 
-    public function user()
+    public function patient()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'patient_id');
     }
 } 
