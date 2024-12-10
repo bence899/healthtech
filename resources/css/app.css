@@ -17,3 +17,11 @@
 .animate-float {
     animation: float 6s ease-in-out infinite;
 }
+
+.tooltip {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.tooltip.opacity-100 {
+    opacity: 1;
+}

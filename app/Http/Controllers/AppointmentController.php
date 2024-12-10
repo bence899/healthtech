@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use Illuminate\Http\Request;
 use App\Notifications\AppointmentStatusChanged;
 use App\Models\Patient;
+use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
@@ -46,23 +47,47 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'doctor_id' => 'required|exists:doctors,id',
-            'appointment_date' => 'required|date|after:today',
-            'appointment_time' => 'required|date_format:H:i',
-            'reason_for_visit' => 'required|string|max:500'
-        ]);
-
+        \Log::info('Appointment request data:', $request->all());
+        
         try {
-            $appointmentDateTime = \Carbon\Carbon::parse(
-                $validated['appointment_date'] . ' ' . $validated['appointment_time']
-            )->format('Y-m-d H:i:s');
+            $validated = $request->validate([
+                'doctor_id' => 'required|exists:doctors,id',
+                'appointment_date' => 'required|date',
+                'appointment_time' => 'required',
+                'reason_for_visit' => 'required|string|max:1000'
+            ]);
 
-            $patient = auth()->user()->patient ?? Patient::create(['user_id' => auth()->id()]);
+            // Combine date and time
+            $appointmentDateTime = Carbon::parse($request->appointment_date . ' ' . $request->appointment_time);
+            
+            // Check if the appointment time is in the future
+            if ($appointmentDateTime->isPast()) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['appointment_date' => 'Appointment date must be in the future']);
+            }
 
+            // Check if doctor is available at this time
+            $doctor = Doctor::findOrFail($request->doctor_id);
+            $dayOfWeek = strtolower($appointmentDateTime->format('l'));
+            
+            // Check for existing appointments
+            $hasConflict = Appointment::where('doctor_id', $request->doctor_id)
+                ->where('status', '!=', 'cancelled')
+                ->whereDate('appointment_date', $appointmentDateTime->toDateString())
+                ->whereTime('appointment_date', $appointmentDateTime->format('H:i:s'))
+                ->exists();
+
+            if ($hasConflict) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['appointment_time' => 'This time slot is already booked']);
+            }
+
+            // Create the appointment
             $appointment = Appointment::create([
-                'patient_id' => $patient->id,
                 'doctor_id' => $validated['doctor_id'],
+                'patient_id' => auth()->user()->patient->id,
                 'appointment_date' => $appointmentDateTime,
                 'reason_for_visit' => $validated['reason_for_visit'],
                 'status' => 'pending'
@@ -70,9 +95,13 @@ class AppointmentController extends Controller
 
             return redirect()->route('appointments.index')
                 ->with('success', 'Appointment booked successfully.');
+            
         } catch (\Exception $e) {
-            return back()->withInput()
-                ->withErrors(['appointment_date' => 'Invalid date/time format']);
+            \Log::error('Appointment creation failed: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to book appointment. Please try again.']);
         }
     }
 

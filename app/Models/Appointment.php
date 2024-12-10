@@ -17,12 +17,12 @@ class Appointment extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'patient_id',
         'doctor_id',
+        'patient_id',
         'appointment_date',
-        'status',
         'reason_for_visit',
-        'notes'
+        'status',
+        'cancellation_reason'
     ];
 
     /**
