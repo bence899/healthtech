@@ -11,6 +11,7 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Admin\DoctorController as AdminDoctorController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\Doctor\DoctorScheduleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,7 +33,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Doctor Routes
     Route::middleware(['auth.doctor'])->prefix('doctor')->name('doctor.')->group(function () {
         Route::get('/dashboard', [DoctorDashboardController::class, 'index'])->name('dashboard');
-        // ... other doctor routes
+        Route::get('/schedule', [DoctorScheduleController::class, 'index'])->name('schedule.index');
+        Route::post('/schedule', [DoctorScheduleController::class, 'store'])->name('schedule.store');
+        Route::put('/schedule/{schedule}', [DoctorScheduleController::class, 'update'])->name('schedule.update');
+        Route::delete('/schedule/{schedule}', [DoctorScheduleController::class, 'destroy'])->name('schedule.destroy');
     });
 
     // Patient Routes

@@ -31,7 +31,7 @@
                         <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">
                             {{ __('My Appointments') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('schedule.index')" :active="request()->routeIs('schedule.*')">
+                        <x-nav-link :href="route('doctor.schedule.index')" :active="request()->routeIs('doctor.schedule.index')">
                             {{ __('My Schedule') }}
                         </x-nav-link>
                     @endif
@@ -119,7 +119,7 @@
                 <x-responsive-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">
                     {{ __('My Appointments') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('schedule.index')" :active="request()->routeIs('schedule.*')">
+                <x-responsive-nav-link :href="route('doctor.schedule.index')" :active="request()->routeIs('doctor.schedule.index')">
                     {{ __('My Schedule') }}
                 </x-responsive-nav-link>
             @endif
